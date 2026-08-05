@@ -430,8 +430,17 @@
     }
 
     message.textContent = 'Checking your area...';
+    // Was reading BBK_CONFIG.restaurantLatitude/Longitude — a value hardcoded
+    // in js/config.js at deploy time. Changing the address in Admin →
+    // Settings updated the database (and the server-side order validation,
+    // which already read it live), but this client-side distance preview
+    // never reflected it — the exact "changing lat/long doesn't work" bug.
+    // catalog.settings.restaurant_latitude/longitude is the live DB value;
+    // BBK_CONFIG stays only as a fallback if that fetch ever fails.
+    const restaurantLat = catalog.settings?.restaurant_latitude ?? BBK_CONFIG.restaurantLatitude;
+    const restaurantLon = catalog.settings?.restaurant_longitude ?? BBK_CONFIG.restaurantLongitude;
     navigator.geolocation.getCurrentPosition(position => {
-      const distanceKm = haversine(BBK_CONFIG.restaurantLatitude, BBK_CONFIG.restaurantLongitude, position.coords.latitude, position.coords.longitude);
+      const distanceKm = haversine(restaurantLat, restaurantLon, position.coords.latitude, position.coords.longitude);
       customerLocation = { latitude: position.coords.latitude, longitude: position.coords.longitude, distanceKm };
       const subtotal = totals().subtotal;
       message.textContent = distanceKm > 5

@@ -32,7 +32,7 @@ window.BBKApi = (() => {
     const [{ data: categories, error: categoryError }, { data: products, error: productError }, { data: settings }, { data: offers }, { data: banners }] = await Promise.all([
       db.from('categories').select('id,name,slug,parent_id,image_url,banner_url,display_order,category_hours(opens_at,closes_at,is_always_open)').eq('is_active', true).order('display_order'),
       db.from('products').select('id,name,description,base_price,discount_price,category_id,is_available,is_featured,is_bestseller,is_recommended,is_seasonal,is_trending,call_to_order,product_type,categories(name),product_images(url,alt_text,display_order),product_variant_groups(id,name,is_required,product_variants(id,name,price_adjustment,is_custom_input,is_available)),product_addon_links(product_addons(id,name,price,is_available))').eq('is_active', true).order('display_order'),
-      db.from('business_settings').select('ordering_enabled,manual_override,custom_cake_enabled,whatsapp_number,restaurant_name,established_year,address,maps_link').eq('id', true).single(),
+      db.from('business_settings').select('ordering_enabled,manual_override,custom_cake_enabled,whatsapp_number,restaurant_name,established_year,address,maps_link,restaurant_latitude,restaurant_longitude').eq('id', true).single(),
       db.from('offers').select('id,name,type,discount_value,applies_to_category_id,applies_to_product_id,min_subtotal,starts_at,ends_at').eq('is_active', true).in('type', ['percent', 'flat']),
       db.from('banners').select('id,image_url,title,subtitle,link_url,display_order').order('display_order'),
     ]);
