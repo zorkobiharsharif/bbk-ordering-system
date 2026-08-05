@@ -1,5 +1,5 @@
 import { db, state, isOwner } from './state.js';
-import { $, toast } from './utils.js';
+import { $, $$, toast } from './utils.js';
 
 const toMinutes = t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
 function nowMinutesIST() {
@@ -13,8 +13,14 @@ function formatTime(hhmm) {
   return m ? `${h12}:${String(m).padStart(2, '0')} ${period}` : `${h12} ${period}`;
 }
 // Same "Open / Closing Soon / Closed" language the customer site shows —
-// this is the owner's own preview of it, computed from the same rule.
-function liveStatus(h) {
+// this is the owner's own preview of it, computed from the same rule. Must
+// check the emergency override first: js/app.js's computeAvailability()
+// treats force_open/force_closed as overriding every category's schedule,
+// and this preview needs to match or it shows stale status (e.g. "Closed")
+// while the override has actually forced the category open for customers.
+function liveStatus(h, override) {
+  if (override === 'force_open') return { tone: 'is-open', label: 'Open (forced)' };
+  if (override === 'force_closed') return { tone: 'is-closed', label: 'Closed (forced)' };
   if (h.is_always_open) return { tone: 'is-open', label: 'Open' };
   const now = nowMinutesIST();
   const open = toMinutes(h.opens_at), close = toMinutes(h.closes_at);
@@ -52,7 +58,21 @@ export async function renderHours(root) {
 
   $('[data-override]', root).addEventListener('change', async event => {
     const { error } = await db.from('business_settings').update({ manual_override: event.target.value }).eq('id', true);
-    if (error) toast('Something went wrong. Please try again.', 'error'); else toast('Override updated.');
+    if (error) { toast('Something went wrong. Please try again.', 'error'); return; }
+    toast('Override updated.');
+    settings.manual_override = event.target.value;
+    // Every category's preview depends on the override (see liveStatus) —
+    // refresh them all in place rather than leaving them stale until the
+    // owner navigates away and back. Re-invoking renderHours(root) here
+    // would stack a second set of listeners on the same root element.
+    $$('[data-category]', root).forEach(row => {
+      const category = categories.find(c => c.id === row.dataset.category);
+      const h = category.category_hours || { opens_at: '09:00', closes_at: '22:00', is_always_open: false };
+      const status = liveStatus(h, settings.manual_override);
+      const preview = row.querySelector('[data-status-preview]');
+      preview.className = `status-pill ${status.tone}`;
+      preview.textContent = status.label;
+    });
   });
 
   const lock = owner ? '' : 'disabled';
@@ -61,7 +81,7 @@ export async function renderHours(root) {
     // categories — a true 1:1 relationship, so PostgREST embeds it as a
     // single object here, not an array (unlike a normal one-to-many embed).
     const h = c.category_hours || { opens_at: '09:00', closes_at: '22:00', is_always_open: false };
-    const status = liveStatus(h);
+    const status = liveStatus(h, settings.manual_override);
     return `<div class="hours-card" data-category="${c.id}">
       <div class="hours-card-top">
         <b>${c.name}</b>
@@ -102,8 +122,13 @@ export async function renderHours(root) {
     save.disabled = false;
     if (error) { toast('Something went wrong. Please try again.', 'error'); return; }
     toast('Hours saved.');
+    // Keep the local cache in sync — the override-change handler above
+    // recomputes every preview from this array, so a stale entry here would
+    // show the pre-save schedule again the next time the override changes.
+    const category = categories.find(c => c.id === record.category_id);
+    if (category) category.category_hours = record;
     const preview = row.querySelector('[data-status-preview]');
-    const status = liveStatus(record);
+    const status = liveStatus(record, settings.manual_override);
     preview.className = `status-pill ${status.tone}`;
     preview.textContent = status.label;
   });
