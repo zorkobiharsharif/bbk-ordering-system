@@ -1,0 +1,50 @@
+# Supabase CLI project file. This project only uses the CLI to deploy Edge
+# Functions to the hosted BBK project (agdmbhmrxfancjuguizk) — it does not run
+# the local dev stack (no local Postgres/Studio/Auth emulation), so this file
+# is intentionally trimmed to what that requires rather than the full
+# `supabase init` template. Schema changes are applied by hand in the
+# Supabase SQL Editor (schema.sql -> seed.sql -> storage.sql -> permissions.sql),
+# not through `supabase db push`.
+#
+# Full reference: https://supabase.com/docs/guides/local-development/cli/config
+
+project_id = "bbk-ordering-site"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 17
+
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]
+
+[realtime]
+enabled = true
+
+[storage]
+enabled = true
+file_size_limit = "10MiB"
+
+[auth]
+enabled = true
+site_url = "http://127.0.0.1:3000"
+additional_redirect_urls = []
+jwt_expiry = 3600
+enable_signup = true
+minimum_password_length = 6
+
+[auth.email]
+enable_signup = true
+enable_confirmations = false
+
+[edge_runtime]
+enabled = true
+policy = "per_worker"
+deno_version = 2

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BBK Admin</title>
+<link rel="icon" href="../assets/bbk-logo.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<div class="app" data-app hidden>
+  <aside>
+    <div class="side-brand"><img src="../assets/bbk-logo.jpg" alt="BBK"><b>BBK Control</b></div>
+    <nav>
+      <button class="active" data-view="dashboard">Dashboard</button>
+      <button data-view="orders">Orders</button>
+      <button data-view="products">Products</button>
+      <button data-view="categories">Categories</button>
+      <button data-view="cake-requests">Cake Requests</button>
+      <button data-view="customers">Customers</button>
+      <button data-view="offers">Offers</button>
+      <button data-view="coupons">Coupons</button>
+      <button data-view="reports">Reports</button>
+      <button data-view="hours">Business Hours</button>
+      <button data-view="banners">Banners</button>
+      <button data-view="notifications">Notifications</button>
+      <button data-view="staff">Staff Management</button>
+      <button data-view="settings">Settings</button>
+      <button data-view="image-guide">Image Guide</button>
+    </nav>
+    <div class="side-actions">
+      <button class="signout" data-change-password>Change password</button>
+      <button class="signout" data-signout>Sign out</button>
+    </div>
+  </aside>
+  <main>
+    <header>
+      <div><p data-date></p><h1 data-title>Dashboard</h1></div>
+      <div class="header-right">
+        <span class="live-counter" data-live-counter hidden></span>
+        <div class="online"><span></span> Ordering live</div>
+      </div>
+    </header>
+    <section data-content></section>
+  </main>
+</div>
+
+<dialog data-admin-dialog>
+  <button type="button" class="close" data-dialog-cancel aria-label="Close">&times;</button>
+  <form method="dialog" data-admin-form>
+    <div data-admin-form-body></div>
+  </form>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="../js/config.js"></script>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

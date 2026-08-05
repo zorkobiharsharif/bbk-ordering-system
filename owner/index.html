@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BBK Admin Login</title>
+<link rel="icon" href="../assets/bbk-logo.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../admin/admin.css">
+</head>
+<body>
+
+<section class="login">
+  <img src="../assets/bbk-logo.jpg" alt="BBK">
+  <p>BBK ADMIN</p>
+  <h1>Sign in</h1>
+  <span>One sign-in for both owner and staff — what you can see and do depends on your account.</span>
+  <form data-login-form>
+    <label>Username<input type="text" name="username" autocomplete="username" required autofocus></label>
+    <label>Password<input type="password" name="password" autocomplete="current-password" required></label>
+    <button>Sign in</button>
+    <small data-login-error></small>
+  </form>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/config.js"></script>
+<script src="../admin/js/login.js"></script>
+</body>
+</html>

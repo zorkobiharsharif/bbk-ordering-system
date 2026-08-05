@@ -1,0 +1,366 @@
+:root {
+  --ink: #201811;
+  --muted: #7a6d5f;
+  --line: #ece2d0;
+  --green: #2e8b57;
+  --yellow: #f6c431;
+  --bg: #faf6ee;
+  --red: #e63946;
+  --amber: #b4860b;
+
+  /* Same brand palette as the customer site (css/style.css) — a shared
+     source of truth so the owner/staff panel and the storefront read as one
+     product, not two apps glued together. Brand actions (active nav, submit
+     buttons, links) use the red/gold brand pair; status colors (success,
+     warning, danger, info) stay semantic and never double as brand accents. */
+  --color-brand: #D6412C; --color-brand-dark: #B5311E; --color-brand-soft: #FBE7E2;
+  --color-gold: #EAA612; --color-gold-soft: #FCF1D6;
+  --color-primary: var(--yellow); --color-primary-ink: #7a5b00;
+  --color-success: var(--green); --color-success-bg: #e8f4e9;
+  --color-warning: var(--amber); --color-warning-bg: #fdf1d6;
+  --color-danger: var(--red); --color-danger-bg: #fde9e8;
+  --color-info: #2563eb; --color-info-bg: #e8f0fe;
+  --color-card: #fff; --color-border: var(--line);
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px;
+  --radius-sm: 8px; --radius-md: 14px; --radius-pill: 999px;
+  --shadow-sm: 0 2px 10px rgba(60,38,14,.07); --shadow-md: 0 14px 34px rgba(60,38,14,.12);
+  --duration-fast: 150ms; --duration-base: 220ms; --ease-out: cubic-bezier(.16,1,.3,1);
+  --touch-min: 44px;
+}
+@media (prefers-reduced-motion: reduce) { * { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
+:focus-visible { outline: 2.5px solid var(--color-info); outline-offset: 2px; }
+
+* { box-sizing: border-box; }
+/* Every panel here is styled for a light background — without this, a
+   browser/OS in dark mode repaints native controls (date pickers, selects)
+   with its own dark palette, which can land as white-on-white or otherwise
+   unreadable text since nothing else here changes to match. */
+:root { color-scheme: light; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 14px Inter, sans-serif; }
+button, input, select, textarea { font: inherit; }
+
+/* Login */
+.login { min-height: 100vh; max-width: 390px; margin: auto; display: grid; place-content: center; padding: 24px; text-align: center; }
+.login img { width: 76px; height: 76px; border-radius: 50%; margin: auto; border: 3px solid var(--color-gold); }
+.login p { color: var(--color-brand); font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+.login h1, .login h2 { font-family: Poppins; margin: 7px 0; }
+.login span { color: var(--muted); font-size: 12px; }
+.login form, .panel form { margin-top: 21px; text-align: left; }
+.login label, .panel label, .form-grid label { display: block; margin: 12px 0; font-size: 12px; font-weight: 800; }
+.login input, .panel input, .panel select, .form-grid input, .form-grid select, .form-grid textarea {
+  display: block; width: 100%; padding: 10px; margin-top: 5px; border: 1px solid var(--line); border-radius: 8px; background: #fff;
+}
+.form-grid textarea { min-height: 64px; resize: vertical; }
+.login button, .panel button, .form-grid + button, dialog button { border: 0; border-radius: var(--radius-sm); background: var(--color-brand); color: #fff; font-weight: 800; padding: 10px 13px; min-height: var(--touch-min); cursor: pointer; transition: background var(--duration-fast), transform var(--duration-fast); }
+.login button:hover, .panel button:hover, dialog button:hover { background: var(--color-brand-dark); }
+.login button:active, .panel button:active, dialog button:active { transform: scale(.97); }
+.login form button { width: 100%; margin-top: 7px; min-height: var(--touch-min); }
+.login small { color: var(--red); min-height: 15px; display: block; margin-top: 7px; }
+.login .switch-role { margin-top: 18px; font-size: 12px; color: var(--muted); }
+.login .switch-role a { color: var(--color-brand); font-weight: 700; }
+
+/* App shell */
+.app { display: grid; grid-template-columns: 230px 1fr; min-height: 100vh; }
+aside { background: #fff; border-right: 1px solid var(--line); padding: 23px 13px; display: flex; flex-direction: column; }
+.side-brand { display: flex; align-items: center; gap: 9px; font: 700 14px Poppins; padding: 0 8px 25px; }
+.side-brand img { width: 35px; height: 35px; border-radius: 50%; border: 2px solid var(--color-gold); }
+nav { display: grid; gap: 4px; }
+nav button, .signout { border: 0; background: transparent; text-align: left; border-radius: var(--radius-sm); padding: 10px 12px; color: var(--muted); font-weight: 700; cursor: pointer; transition: background var(--duration-fast), color var(--duration-fast); }
+nav button:hover { background: var(--color-brand-soft); color: var(--color-brand); }
+.active { background: var(--color-brand-soft) !important; color: var(--color-brand) !important; }
+.side-actions { margin-top: auto; display: grid; gap: 4px; }
+
+main { padding: 32px min(5vw, 68px); }
+main > header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+header p { margin: 0; color: var(--muted); font-size: 11px; }
+header h1 { font: 700 26px Poppins; margin: 4px 0; }
+.header-right { display: flex; align-items: center; gap: 14px; }
+.live-counter { background: var(--red); color: #fff; font-weight: 800; font-size: 11px; border-radius: 20px; padding: 3px 9px; }
+.online { color: var(--green); font-weight: 800; font-size: 12px; }
+.online span { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+
+/* Ordering on/off — deliberately big and impossible to miss, since it's the
+   single most consequential switch in the whole panel. */
+.ordering-toggle-panel { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.ordering-toggle-panel b { display: block; font: 700 15px Poppins; }
+.ordering-toggle-panel small { color: var(--muted); }
+.ordering-toggle-control { display: flex; align-items: center; gap: 12px; }
+.ordering-status-pill { font: 800 11px Poppins; letter-spacing: .04em; text-transform: uppercase; padding: 6px 14px; border-radius: 20px; }
+.ordering-status-pill.is-open { background: #e8f4e9; color: var(--green); }
+.ordering-status-pill.is-closed { background: #fde9e8; color: var(--red); }
+.ordering-toggle { border: 0; border-radius: 10px; padding: 14px 22px; font: 800 14px Poppins; letter-spacing: .02em; color: #fff; cursor: pointer; }
+.ordering-toggle.is-on { background: var(--red); }
+.ordering-toggle.is-off { background: var(--green); }
+.ordering-toggle:disabled { opacity: .6; cursor: not-allowed; }
+
+/* Generic status pill — color + dot + text, used anywhere a live status is shown (hours preview, etc). */
+.status-pill { display: inline-flex; align-items: center; gap: 6px; font: 800 11px/1 Poppins; letter-spacing: .02em; padding: 6px 12px; border-radius: 20px; white-space: nowrap; }
+.status-pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
+.status-pill.is-open { background: var(--color-success-bg); color: var(--color-success); }
+.status-pill.is-soon { background: var(--color-warning-bg); color: var(--color-warning); }
+.status-pill.is-closed { background: var(--color-danger-bg); color: var(--color-danger); }
+
+/* Business Hours page */
+.emergency-panel { border: 1px solid #f3c5c0; background: #fff8f7; }
+.emergency-head { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px; }
+.emergency-icon { flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--color-danger); color: #fff; font: 800 15px/28px Poppins; text-align: center; }
+.emergency-head h2 { margin: 0 0 2px; }
+.emergency-panel select { width: 100%; max-width: 420px; }
+.hours-card { border: 1px solid var(--color-border, #eee); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; }
+.hours-card-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.hours-card-top b { font: 700 15px Poppins; }
+.hours-card-controls { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.hours-time-row { display: flex; align-items: center; gap: 8px; }
+.hours-time-row[hidden] { display: none; }
+.hours-arrow { color: var(--muted); }
+.hours-card input[type="time"] { min-height: 44px; }
+.hours-card .check { display: flex; align-items: center; gap: 6px; min-height: 44px; }
+
+/* Cards / panels */
+/* auto-fit instead of a fixed 4 columns — Dashboard has 3 cards, Reports
+   has 6; a fixed count either leaves an awkward gap or an uneven last row. */
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.card, .panel { background: #fff; border: 1px solid var(--line); border-radius: 13px; padding: 17px; margin-bottom: 16px; }
+.card span, .card small { color: var(--muted); font-size: 11px; }
+.card b { display: block; font: 700 25px Poppins; margin: 7px 0; }
+.panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid var(--line); padding-bottom: 13px; margin-bottom: 13px; }
+.panel h2 { font-size: 18px; margin: 0; }
+.panel-head select, .panel-head input { display: inline-block; width: auto; margin: 0; }
+.panel-head button { min-height: var(--touch-min); }
+.hint { color: var(--muted); font-size: 12px; }
+.image-hint { display: block; color: var(--muted); font-size: 10px; font-weight: 600; margin-top: 3px; }
+.image-guide-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.image-guide-card { border: 1px solid var(--line); border-radius: var(--radius-md); overflow: hidden; background: #fff; }
+.image-guide-swatch { display: grid; place-items: center; background: linear-gradient(150deg, var(--color-gold-soft), #f0d896); color: #6b551e; font: 800 12px Poppins; letter-spacing: .04em; }
+.image-guide-swatch[data-ratio="square"] { aspect-ratio: 1 / 1; }
+.image-guide-swatch[data-ratio="wide"] { aspect-ratio: 16 / 7; }
+.image-guide-body { padding: 14px; }
+.image-guide-body b { display: block; font: 700 13px Poppins; margin-bottom: 3px; }
+.image-guide-body strong { display: block; color: var(--color-brand); font-size: 13px; margin-bottom: 6px; }
+.image-guide-body small { display: block; color: var(--muted); font-size: 10.5px; margin-bottom: 8px; }
+.image-guide-body p { margin: 0; font-size: 11.5px; color: var(--ink); line-height: 1.5; }
+.link-nav { border: 0; background: none; padding: 0; color: var(--color-brand); font-weight: 700; text-decoration: underline; cursor: pointer; }
+.sub { font: 700 13px Poppins; margin: 20px 0 8px; }
+
+/* Rows */
+.admin-row { display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 13px; align-items: center; border-bottom: 1px solid var(--line); padding: 13px 0; font-size: 12px; }
+.admin-row b, .admin-row small { display: block; }
+.admin-row small { color: var(--muted); margin-top: 3px; }
+.row-actions { display: flex; gap: 6px; }
+.row-actions button, .admin-row > button { border: 1px solid var(--line); background: #fff; color: var(--ink); font-weight: 700; padding: 6px 10px; border-radius: 7px; }
+
+/* Badges / status — color is never the only signal: every badge also has a
+   dot + its own text, per WCAG "don't convey meaning by color alone". */
+.badge, .status { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 800; padding: 4px 9px; border-radius: var(--radius-pill); white-space: nowrap; }
+.badge::before, .status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none; }
+.badge-good, .status { background: var(--color-success-bg); color: var(--color-success); }
+.badge-warn, .status.new, .status.address_needs_check, .status.kitchen { background: var(--color-warning-bg); color: var(--color-warning); }
+.badge-info, .status.accepted, .status.out_for_delivery { background: var(--color-info-bg); color: var(--color-info); }
+.badge-error, .status.cancelled, .status.out-of-stock { background: var(--color-danger-bg); color: var(--color-danger); }
+.badge-muted { background: #eee; color: var(--muted); }
+.badge-default { background: #eee; color: var(--ink); }
+
+/* Buttons — the ".button" class itself has to carry the full base look
+   (border-radius, centering, no underline), not just ".panel button"/"dialog
+   button": those element-scoped rules only ever matched real <button> tags,
+   so a class="button" <a> (e.g. "Send to WhatsApp") fell back to square
+   corners and un-centered text instead of matching its sibling button. */
+.button { display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); font-weight: 800; text-decoration: none; cursor: pointer; }
+button.danger, .danger { color: var(--red) !important; border-color: #f3c9c9 !important; }
+.button.primary { background: var(--color-brand); color: #fff; }
+.button.primary:hover { background: var(--color-brand-dark); }
+.button.danger { background: var(--color-danger-bg); color: var(--color-danger) !important; border: 1.5px solid var(--color-danger); }
+.button.success { background: var(--color-success-bg); color: var(--color-success) !important; border: 1.5px solid var(--color-success); }
+.button.danger:hover { background: var(--color-danger); color: #fff !important; }
+.button.success:hover { background: var(--color-success); color: #fff !important; }
+
+/* Staff stock cards (Products, Categories) — large, one-purpose, kitchen-friendly */
+.stock-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.stock-card { border: 1px solid var(--line); border-radius: var(--radius-md); padding: 16px; background: #fff; display: flex; flex-direction: column; gap: 10px; }
+.stock-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.stock-card-top b { font: 700 14px Poppins; }
+.stock-card > small { color: var(--muted); font-size: 11px; margin-top: -6px; }
+.stock-card-actions { display: flex; flex-direction: column; gap: 8px; }
+.stock-card button.wide { min-height: var(--touch-min); font-size: 13px; }
+
+/* Shared loading state — replaces blank panels / bare "Loading…" text */
+.loading-row { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 40px 20px; color: var(--muted); font-size: 12px; font-weight: 700; }
+.spinner { width: 16px; height: 16px; border: 2px solid var(--line); border-top-color: var(--color-brand); border-radius: 50%; animation: bbk-spin .7s linear infinite; flex: none; }
+@keyframes bbk-spin { to { transform: rotate(360deg); } }
+
+/* Customer detail popup */
+.customer-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 16px 0; }
+.customer-stat { border: 1px solid var(--line); border-radius: var(--radius-md); padding: 12px; text-align: center; }
+.customer-stat span { display: block; font-size: 10.5px; color: var(--muted); font-weight: 700; margin-bottom: 4px; }
+.customer-stat b { font: 700 15px Poppins; }
+.customer-detail-row { border: 1px solid var(--line); border-radius: var(--radius-md); padding: 12px 14px; }
+.customer-detail-row b { display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+.customer-detail-row span { font-size: 13px; }
+/* Stock actions — red always means "will go out of stock", green always
+   means "will go back in stock", the same way everywhere: badges, buttons. */
+button.stock-out { color: var(--red) !important; border-color: #f3c9c9 !important; }
+button.stock-in { color: var(--green) !important; border-color: #c9e6d3 !important; }
+.stock-note { display: block; margin-top: 4px; font-weight: 800; }
+.stock-note-out { color: var(--red); }
+.stock-note-in { color: var(--green); }
+.stock-note-partial { color: var(--amber); }
+button.button { background: var(--ink); color: #fff; }
+label.check { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 12px; min-height: var(--touch-min); }
+label.check input { width: auto; display: inline; margin: 0; }
+
+/* Search box */
+.search-box { display: block; width: 100%; max-width: 320px; min-height: var(--touch-min); padding: 9px 12px; margin-bottom: 14px; border: 1px solid var(--line); border-radius: 8px; }
+
+/* Dialogs */
+dialog { position: relative; border: 0; border-radius: 16px; width: min(500px, calc(100% - 30px)); box-shadow: 0 20px 50px rgba(0, 0, 0, .2); max-height: calc(100vh - 40px); overflow: auto; }
+dialog.wide { width: min(720px, calc(100% - 30px)); }
+dialog::backdrop { background: rgba(0, 0, 0, .5); }
+dialog form { padding: 18px; }
+/* Direct child of <dialog>, not <form> — pinned to the dialog's own
+   top-right corner, clear of the rounded corner and the form's own padding
+   (the earlier version lived inside <form>, so it could end up flush
+   against — or clipped by — the dialog's rounded edge). */
+.close { position: absolute; top: 14px; right: 14px; z-index: 5; border: 0; background: #eee; color: var(--ink); border-radius: 50%; width: 29px; height: 29px; font-size: 18px; line-height: 29px; text-align: center; padding: 0; box-shadow: 0 2px 6px rgba(0,0,0,.15); }
+.form-title { font: 700 21px Poppins; margin: 0 0 12px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.full { grid-column: 1 / -1; }
+fieldset.flags { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+fieldset.flags legend { font-size: 11px; font-weight: 800; color: var(--muted); padding: 0 6px; }
+.flags { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+
+/* Thumbnails (product/category/banner photo previews) */
+.thumb { width: 100%; max-height: 160px; object-fit: cover; border-radius: 8px; margin: 6px 0; }
+.thumb-sm { width: 56px; height: 40px; object-fit: cover; border-radius: 6px; }
+.thumb-wrap { position: relative; display: inline-block; margin: 4px; }
+.thumb-wrap .thumb { width: 90px; height: 70px; margin: 0; }
+.thumb-wrap button { position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; border-radius: 50%; border: 0; background: var(--red); color: #fff; font-size: 12px; line-height: 1; padding: 0; }
+
+/* Variant / add-on editor */
+.variant-group { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; }
+.variant-group-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.variant-group-head b { flex: 1; }
+.variant-row { display: grid; grid-template-columns: 1fr 90px auto; gap: 8px; align-items: center; padding: 4px 0; font-size: 12px; }
+.variant-row input { width: 100%; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; }
+.inline-add { display: flex; gap: 8px; margin: 10px 0; flex-wrap: wrap; align-items: center; }
+.inline-add input, .inline-add select { width: auto; flex: 1; min-width: 100px; padding: 8px; border: 1px solid var(--line); border-radius: 6px; margin: 0; }
+.addon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; margin: 10px 0; }
+.addon-check { position: relative; padding-right: 22px; border: 1px solid var(--line); border-radius: 8px; padding: 8px 24px 8px 10px; }
+.addon-delete { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; border-radius: 50%; border: 0; padding: 0; font-size: 12px; line-height: 1; background: #fde9e8; }
+
+/* Orders / requests filter bar — put front and center, not buried in the panel head */
+.order-filter-bar { background: #fff9e8; border-color: var(--yellow); }
+.order-filter-row { display: flex; align-items: end; gap: 14px; flex-wrap: wrap; margin-top: 12px; }
+.filter-label { font-size: 11px; font-weight: 800; color: var(--muted); margin: 0; }
+.filter-label select, .filter-label input { margin-top: 4px; min-width: 160px; min-height: var(--touch-min); }
+.order-filter-row > button { align-self: flex-end; min-height: var(--touch-min); }
+.filter-chip-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.filter-chip { border: 1px solid var(--line); background: #fff; color: var(--ink); font-weight: 700; padding: 8px 14px; min-height: var(--touch-min); border-radius: 20px; font-size: 12px; }
+.filter-chip.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+/* GPS link on an order — a real copyable text field, not just a link, so it
+   can be pasted straight into a WhatsApp message to the delivery rider. */
+/* Delivery block — real selectable page text (not an <input> value, which a
+   normal drag-select silently skips), plus a one-tap WhatsApp send so
+   copy/paste isn't even necessary for the common case. */
+.delivery-block { margin: 14px 0; }
+.delivery-text { background: #f8f9f6; border: 1px solid var(--line); border-radius: var(--radius-md); padding: 12px 14px; font: 12px/1.6 -apple-system, sans-serif; color: var(--ink); white-space: pre-wrap; word-break: break-word; user-select: all; }
+.delivery-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.delivery-actions .button { white-space: nowrap; padding: 0 16px; min-height: var(--touch-min); flex: 1; min-width: 140px; }
+
+/* Order items — was a bare <pre> with zero styling (browser-default
+   monospace, no border, blended straight into the page). Multi-item orders
+   were genuinely hard to read at a glance. */
+.order-items { margin: 14px 0; border: 1px solid var(--line); border-radius: var(--radius-md); overflow: hidden; }
+.order-items > b { display: block; padding: 10px 14px; background: var(--bg); font: 700 12px Poppins; border-bottom: 1px solid var(--line); }
+.order-item-row { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid var(--line); }
+.order-item-row:last-child { border-bottom: 0; }
+
+/* Staff order queue — large cards, one big next-step button, works well as
+   a mouse-driven counter screen or a one-thumb phone/tablet in the kitchen. */
+.queue-list { display: grid; gap: 12px; }
+.queue-card { border: 1px solid var(--line); border-radius: var(--radius-md); padding: 16px; background: #fff; }
+.queue-card-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+.queue-card-top b { font: 700 15px Poppins; }
+.queue-card p { margin: 0 0 12px; color: var(--muted); font-size: 12.5px; }
+.queue-card-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.queue-card-actions button:not(.primary) { border: 1px solid var(--line); background: #fff; color: var(--ink); min-height: var(--touch-min); padding: 0 16px; }
+.queue-card-actions button.primary.wide { flex: 1; min-width: 200px; min-height: var(--touch-min); }
+@media (max-width: 640px) { .queue-card-actions { flex-direction: column; } .queue-card-actions button.primary.wide { min-width: 0; } }
+
+/* Order status — one big obvious next step, not a menu of every status */
+.status-action { display: flex; align-items: center; gap: 12px; margin: 16px 0; padding: 14px; background: var(--bg); border-radius: var(--radius-md); }
+.status-action .status { font-size: 11px; padding: 6px 12px; flex: none; }
+.status-action button.wide, dialog button.wide { flex: 1; min-height: var(--touch-min); font-size: 14px; }
+.status-more { margin: 14px 0; border: 1px solid var(--line); border-radius: var(--radius-md); padding: 4px 14px; }
+.status-more summary { cursor: pointer; padding: 10px 0; font-size: 12px; font-weight: 700; color: var(--muted); }
+.status-more[open] summary { color: var(--ink); }
+.status-more label, .status-more button { margin-bottom: 12px; }
+
+/* Business hours */
+.hours-row { display: grid; grid-template-columns: 140px 1fr auto auto auto auto; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 12px; }
+.hours-row input[type="time"] { width: auto; padding: 6px 8px; }
+
+/* History */
+.history-list { max-height: 300px; overflow: auto; }
+.history-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 12px; }
+.history-row span { color: var(--muted); }
+
+/* Reports */
+.report-range { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.report-range button, .report-range input { padding: 8px 10px; font-size: 11px; border: 1px solid var(--line); background: #fff; color: var(--ink); border-radius: 7px; }
+.report-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.report-table th, .report-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+.report-table th { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .04em; }
+.export-row { display: flex; gap: 6px; }
+.export-row button { font-size: 11px; padding: 6px 10px; border: 1px solid var(--line); background: #fff; color: var(--ink); border-radius: 6px; font-weight: 700; }
+
+/* New-order alert — large, impossible-to-miss overlay that stays up (and the
+   sound loop in notifications.js keeps chiming) until the owner opens or
+   accepts the order. Deliberately has no "dismiss" button — the whole point
+   is that closing the tab's attention on it isn't an option. */
+.order-alert-overlay { position: fixed; inset: 0; z-index: 80; background: rgba(20, 30, 20, .55); display: flex; align-items: center; justify-content: center; padding: 20px; animation: order-alert-fade .15s ease-out; }
+.order-alert-card { background: #fff; border-radius: 20px; padding: 32px; width: min(380px, 100%); text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,.35); animation: order-alert-pop .35s cubic-bezier(.34,1.56,.64,1); }
+.order-alert-badge { display: inline-block; background: var(--red); color: #fff; font: 800 11px Poppins; letter-spacing: .06em; text-transform: uppercase; padding: 5px 12px; border-radius: 20px; margin-bottom: 14px; }
+.order-alert-card h2 { font: 800 34px Poppins; margin: 0; }
+.order-alert-amount { font: 700 22px Poppins; color: var(--green); margin: 6px 0 0; }
+.order-alert-more { color: var(--muted); font-size: 12px; margin: 10px 0 0; }
+.order-alert-actions { display: grid; gap: 8px; margin-top: 24px; }
+.order-alert-actions .button { background: #eee; color: var(--ink); padding: 13px; border-radius: 10px; font-weight: 800; }
+.order-alert-accept { border: 0; background: var(--green); color: #fff; padding: 14px; border-radius: 10px; font: 800 15px Poppins; cursor: pointer; }
+@keyframes order-alert-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes order-alert-pop { from { transform: scale(.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+/* Toasts */
+.toast-host { position: fixed; bottom: 20px; right: 20px; z-index: 50; display: flex; flex-direction: column; gap: 8px; }
+.toast { background: var(--ink); color: #fff; padding: 10px 16px; border-radius: 8px; font-size: 12px; font-weight: 700; opacity: 0; transform: translateY(8px); transition: .2s; box-shadow: 0 10px 25px rgba(0, 0, 0, .2); }
+.toast.show { opacity: 1; transform: none; }
+.toast-error { background: var(--red); }
+
+@media (max-width: 480px) {
+  .status-action { flex-direction: column; align-items: stretch; }
+  .status-action .status { align-self: flex-start; }
+}
+
+@media (max-width: 720px) {
+  .app { display: block; }
+  /* Everything — logo, nav, Change password, Sign out — lives in one
+     horizontally-scrolling row instead of Change password/Sign out being
+     hidden entirely: there was previously no way to sign out on mobile. */
+  aside { height: auto; position: sticky; top: 0; z-index: 4; padding: 10px; border-bottom: 1px solid var(--line); display: flex; flex-direction: row; align-items: center; gap: 8px; overflow-x: auto; }
+  /* A plain horizontal-scroll row with no scrollbar gives no hint that most
+     of the nav is off-screen — a fixed fade on the trailing edge signals
+     "there's more" the same way a native scrollable tab bar would. */
+  .app::after { content: ""; position: fixed; top: 0; right: 0; width: 28px; height: 55px; z-index: 5; background: linear-gradient(90deg, transparent, #fff); pointer-events: none; }
+  .side-brand { padding: 0; flex: none; }
+  nav { display: flex; flex: none; }
+  nav button { white-space: nowrap; padding: 8px 12px; min-height: var(--touch-min); display: flex; align-items: center; }
+  .side-actions { display: flex; flex-direction: row; flex: none; margin-top: 0; gap: 8px; }
+  .signout { white-space: nowrap; padding: 8px 12px; min-height: var(--touch-min); display: flex; align-items: center; }
+  main { padding: 20px 14px; }
+  .cards { grid-template-columns: repeat(2, 1fr); }
+  .admin-row { grid-template-columns: 1fr auto; }
+  .admin-row > div:nth-child(2) { grid-column: 1 / -1; grid-row: 2; }
+  .panel-head { align-items: start; flex-direction: column; }
+  .form-grid, .flags { grid-template-columns: 1fr; }
+  .hours-row { grid-template-columns: 1fr; }
+}
