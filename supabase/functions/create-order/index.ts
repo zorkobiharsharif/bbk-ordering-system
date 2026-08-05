@@ -37,7 +37,13 @@ Deno.serve(async request => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: cors });
   try {
     const body = await request.json(); const customer = body.customer || {}, lines = body.lines || [];
-    if (!/^[0-9]{10}$/.test(customer.phone || '') || !customer.name?.trim() || !customer.address?.trim() || !Array.isArray(lines) || !lines.length) return json({ error: 'Please enter your name, phone, address and order.' }, 400);
+    // GPS location is mandatory (business requirement) — address/landmark is
+    // now a supplementary note the customer may leave for the rider, not a
+    // substitute for a real location. A request with no lat/long is rejected
+    // outright rather than falling back to the old "address_needs_check"
+    // manual-review status.
+    if (!/^[0-9]{10}$/.test(customer.phone || '') || !customer.name?.trim() || !Array.isArray(lines) || !lines.length) return json({ error: 'Please enter your name, phone and order.' }, 400);
+    if (!body.location?.latitude || !body.location?.longitude) return json({ error: 'Please share your location to place the order.' }, 400);
     const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
     const { data: settings } = await db.from('business_settings').select('*').eq('id', true).single();
     if (!settings?.ordering_enabled) return json({ error: 'Online ordering is currently closed. Please call BBK.' }, 400);
@@ -82,10 +88,13 @@ Deno.serve(async request => {
     let coupon:any = null, discount = offerDiscount;
     if (body.coupon) { const { data } = await db.from('coupons').select('*').eq('code', String(body.coupon).toUpperCase()).eq('is_active', true).maybeSingle(); coupon = data; const now = new Date(); if (!coupon || (coupon.starts_at && new Date(coupon.starts_at)>now) || (coupon.ends_at && new Date(coupon.ends_at)<now) || subtotal < Number(coupon.min_subtotal)) return json({ error: 'This coupon is not valid for this order.' },400); let couponDiscount = coupon.discount_type === 'percent' ? subtotal * Number(coupon.discount_value) / 100 : Number(coupon.discount_value); if (coupon.max_discount) couponDiscount = Math.min(couponDiscount, Number(coupon.max_discount)); discount += couponDiscount; }
     discount = Math.min(discount, subtotal);
-    let status = 'new', distanceKm:number|null = null;
-    if (body.location?.latitude && body.location?.longitude) { distanceKm = distance(Number(settings.restaurant_latitude),Number(settings.restaurant_longitude),Number(body.location.latitude),Number(body.location.longitude)); if (distanceKm > 5) return json({ error: 'This location is beyond 5 km. Please call BBK.' },400); const min = distanceKm > 3 ? 300 : 100; if (subtotal < min) return json({ error: `Minimum order is ₹${min} in this area.` },400); } else status = 'address_needs_check';
-    const { data: savedCustomer, error: customerError } = await db.from('customers').upsert({ name: customer.name.trim(), phone: customer.phone, last_address: customer.address.trim(), last_landmark: customer.landmark || null }, { onConflict: 'phone' }).select().single(); if (customerError) throw customerError;
-    const { data: order, error: orderError } = await db.from('orders').insert({ customer_id:savedCustomer.id,status,subtotal,discount,cod_total:subtotal-discount,coupon_id:coupon?.id || null,offer_id:offer?.id || null,address:customer.address.trim(),landmark:customer.landmark || null,delivery_notes:customer.notes || null,latitude:body.location?.latitude || null,longitude:body.location?.longitude || null,distance_km:distanceKm }).select().single(); if (orderError) throw orderError;
+    const status = 'new';
+    const distanceKm = distance(Number(settings.restaurant_latitude),Number(settings.restaurant_longitude),Number(body.location.latitude),Number(body.location.longitude));
+    if (distanceKm > 5) return json({ error: 'This location is beyond 5 km. Please call BBK.' },400);
+    const min = distanceKm > 3 ? 300 : 100; if (subtotal < min) return json({ error: `Minimum order is ₹${min} in this area.` },400);
+    const addressNote = (customer.address || '').trim() || null;
+    const { data: savedCustomer, error: customerError } = await db.from('customers').upsert({ name: customer.name.trim(), phone: customer.phone, last_address: addressNote, last_landmark: customer.landmark || null }, { onConflict: 'phone' }).select().single(); if (customerError) throw customerError;
+    const { data: order, error: orderError } = await db.from('orders').insert({ customer_id:savedCustomer.id,status,subtotal,discount,cod_total:subtotal-discount,coupon_id:coupon?.id || null,offer_id:offer?.id || null,address:addressNote,landmark:customer.landmark || null,delivery_notes:customer.notes || null,latitude:body.location.latitude,longitude:body.location.longitude,distance_km:distanceKm }).select().single(); if (orderError) throw orderError;
     for (const line of verified) {
       const { data:item, error } = await db.from('order_items').insert({ order_id:order.id,product_id:line.product.id,product_name:line.product.name,category_id:line.product.category_id,base_price:line.product.base_price,variant_name:line.variant?.name || null,variant_price:line.variant?.price_adjustment || 0,quantity:line.quantity,line_total:line.unit*line.quantity }).select().single(); if(error) throw error;
       if(line.addons.length) await db.from('order_item_addons').insert(line.addons.map((a:any)=>({order_item_id:item.id,addon_name:a.name,addon_price:a.price})));
@@ -106,7 +115,7 @@ Deno.serve(async request => {
       } catch (stockError) { console.error('inventory update failed', stockError); }
     }
 
-    const itemText = verified.map(l => `• ${l.product.name}${l.variant ? ` (${l.variant.name})` : ''}${l.addons.length ? ` + ${l.addons.map((a:any)=>a.name).join(', ')}` : ''} × ${l.quantity}`).join('\n'); const hasGps = body.location?.latitude && body.location?.longitude; const gpsLines = hasGps ? `Latitude: ${body.location.latitude}\nLongitude: ${body.location.longitude}\nMap: https://www.google.com/maps?q=${body.location.latitude},${body.location.longitude}` : 'GPS location: Not shared'; const message = `BBK ORDER #${order.order_number}\n\nCustomer: ${customer.name}\nPhone: ${customer.phone}\nAddress: ${customer.address}\nLandmark: ${customer.landmark || '-'}\n${gpsLines}\n\nItems:\n${itemText}\n\nSubtotal: ₹${subtotal}\n${offer ? `Offer applied: ${offer.name}\n` : ''}Discount: ₹${discount}\nCOD total: ₹${subtotal-discount}\nCash to collect: ₹${subtotal-discount}\n\nDelivery note: ${customer.notes || '-'}`;
+    const itemText = verified.map(l => `• ${l.product.name}${l.variant ? ` (${l.variant.name})` : ''}${l.addons.length ? ` + ${l.addons.map((a:any)=>a.name).join(', ')}` : ''} × ${l.quantity}`).join('\n'); const hasGps = body.location?.latitude && body.location?.longitude; const gpsLines = hasGps ? `Latitude: ${body.location.latitude}\nLongitude: ${body.location.longitude}\nMap: https://www.google.com/maps?q=${body.location.latitude},${body.location.longitude}` : 'GPS location: Not shared'; const message = `BBK ORDER #${order.order_number}\n\nCustomer: ${customer.name}\nPhone: ${customer.phone}\nAddress note: ${addressNote || '-'}\nLandmark: ${customer.landmark || '-'}\n${gpsLines}\n\nItems:\n${itemText}\n\nSubtotal: ₹${subtotal}\n${offer ? `Offer applied: ${offer.name}\n` : ''}Discount: ₹${discount}\nCOD total: ₹${subtotal-discount}\nCash to collect: ₹${subtotal-discount}\n\nDelivery note: ${customer.notes || '-'}`;
 
     // Admin "new order" notifications can't use postgres_changes here: that
     // relies on RLS (is_admin()), which in turn reads the x-admin-session

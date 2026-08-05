@@ -124,7 +124,7 @@ export async function openOrder(id, onUpdated) {
   const deliveryMessage = [
     `Order #BBK-${o.order_number}`,
     `${o.customers.name} - ${o.customers.phone}`,
-    `${o.address}${o.landmark ? `, ${o.landmark}` : ''}`,
+    [o.address, o.landmark].filter(Boolean).join(', ') || 'No address note left — GPS pin below',
     mapUrl ? `${mapUrl} (${Number(o.distance_km).toFixed(1)} km away)` : 'No GPS shared — confirm the address with the customer',
     '',
     ...itemLines,

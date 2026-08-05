@@ -424,8 +424,9 @@
 
   function getLocation() {
     const message = $('[data-location-message]');
+    const submit = $('[data-checkout-submit]');
     if (!navigator.geolocation) {
-      message.textContent = 'Location is unavailable. BBK will check your address.';
+      message.textContent = 'Location is unavailable on this device. Please call BBK to order.';
       return;
     }
 
@@ -443,14 +444,22 @@
       const distanceKm = haversine(restaurantLat, restaurantLon, position.coords.latitude, position.coords.longitude);
       customerLocation = { latitude: position.coords.latitude, longitude: position.coords.longitude, distanceKm };
       const subtotal = totals().subtotal;
-      message.textContent = distanceKm > 5
-        ? 'This location is beyond 5 km. Please call BBK.'
-        : distanceKm > 3 && subtotal < 300
-          ? 'Minimum order is Rs 300 in this area.'
-          : `Delivery available - ${distanceKm.toFixed(1)} km from BBK`;
+      const blocked = distanceKm > 5 ? 'This location is beyond 5 km. Please call BBK.'
+        : distanceKm > 3 && subtotal < 300 ? 'Minimum order is Rs 300 in this area.'
+        : null;
+      message.textContent = blocked || `Delivery available - ${distanceKm.toFixed(1)} km from BBK`;
+      // A blocked distance/minimum still counts as "location shared" — the
+      // customer did their part; submitOrder() re-checks the same distance
+      // rule and throws with the same message, so leaving submit enabled
+      // here just surfaces that error at submit time instead of dead-ending
+      // them at the location button with no way to see the actual reason.
+      submit.disabled = false;
+      submit.textContent = 'Place order on WhatsApp →';
     }, () => {
       customerLocation = null;
-      message.textContent = 'BBK will check your address before accepting the order.';
+      submit.disabled = true;
+      submit.textContent = 'Share location to continue';
+      message.textContent = 'Location denied — we need it to deliver accurately. Please allow location access and try again, or call BBK to order.';
     }, { enableHighAccuracy: true, timeout: 10000 });
   }
 
@@ -458,6 +467,7 @@
     const amount = totals();
     if (!amount.count) return;
     if (orderingClosed) throw new Error("We're currently closed. Please visit again later.");
+    if (!customerLocation) throw new Error('Please share your location to place the order.');
     if (customerLocation?.distanceKm > 5) throw new Error('This location is beyond 5 km. Please call BBK.');
     if (customerLocation?.distanceKm > 3 && amount.subtotal < 300) throw new Error('Minimum order is Rs 300 in this area.');
 
@@ -571,6 +581,11 @@
     if (event.target.closest('[data-checkout]')) {
       if (!totals().count || orderingClosed) return;
       closeCart();
+      customerLocation = null;
+      const submit = $('[data-checkout-submit]');
+      submit.disabled = true;
+      submit.textContent = 'Share location to continue';
+      $('[data-location-message]').textContent = 'Required to place your order.';
       $('.checkout-dialog').showModal();
     }
 
