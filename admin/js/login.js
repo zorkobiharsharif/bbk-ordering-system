@@ -29,7 +29,7 @@
       }
       if (data?.error) { errorNode.textContent = data.error; return; }
       localStorage.setItem('bbk-admin-session', JSON.stringify(data));
-      location.href = '/admin/';
+      location.href = window.bbkPath('/admin/');
     } catch (err) {
       console.error('Unexpected sign-in error:', err);
       errorNode.textContent = 'Something went wrong signing in. Please try again.';

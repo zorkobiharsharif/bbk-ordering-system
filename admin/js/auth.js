@@ -12,7 +12,7 @@ export function guard(onReady) {
   const session = getSession();
   if (!session?.token || !session.expiresAt || new Date(session.expiresAt) <= new Date()) {
     clearSession();
-    location.href = '/owner/';
+    location.href = window.bbkPath('/owner/');
     return;
   }
   state.profile = { id: session.userId, username: session.username, role: session.role };
@@ -27,6 +27,6 @@ export function wireSignOut() {
     const session = getSession();
     clearSession();
     try { await db.functions.invoke('admin-logout', { body: { token: session?.token } }); } catch { /* best-effort */ }
-    location.href = '/owner/';
+    location.href = window.bbkPath('/owner/');
   });
 }

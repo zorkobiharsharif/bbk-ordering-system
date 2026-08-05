@@ -3,11 +3,17 @@
 <head>
 <meta charset="utf-8">
 <title>Redirecting…</title>
-<meta http-equiv="refresh" content="0; url=/owner/">
+<script src="../js/base-path.js"></script>
 </head>
 <body>
-<!-- Owner and staff now share one sign-in page. -->
-<script>location.replace('/owner/');</script>
-<p>Redirecting to <a href="/owner/">the sign-in page</a>…</p>
+<!-- Owner and staff now share one sign-in page. No <meta http-equiv="refresh">
+     fallback here — it can only ever point to a hardcoded path, which is
+     exactly what breaks on GitHub Pages' /<repo-name>/ prefix. The JS
+     redirect below is base-path aware and fires immediately; this admin
+     tool already requires JS for everything else, so a no-JS fallback
+     wasn't adding real coverage. -->
+<script>location.replace(window.bbkPath('/owner/'));</script>
+<p>Redirecting to <a data-owner-link href="/owner/">the sign-in page</a>…</p>
+<script>document.querySelector('[data-owner-link]').href = window.bbkPath('/owner/');</script>
 </body>
 </html>
