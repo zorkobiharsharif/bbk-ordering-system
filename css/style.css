@@ -136,6 +136,17 @@ nav a:hover { color: var(--color-primary); }
 
 .photo-slot { position: relative; isolation: isolate; border-radius: var(--radius-xl); overflow: hidden; min-height: 380px; box-shadow: var(--shadow-lg); background: linear-gradient(155deg, #F4D89C, #E9AE55); display: grid; place-content: center; text-align: center; }
 .photo-slot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+/* The hero can end up showing any photo the owner picks, not just a
+   pre-cropped 16:7 banner — a fixed box + object-fit (cover or contain)
+   either crops that photo's edges or leaves empty gaps top/bottom or
+   side-to-side, depending on how far its shape is from the box's. Letting
+   the box take on the image's own natural size instead avoids both: no
+   crop, no gap, whatever shape the photo actually is. A fixed 16:9 box only
+   applies to the *placeholder* state (no image yet), since there's nothing
+   to size from there. */
+.hero-photo { aspect-ratio: 16 / 9; min-height: 0; }
+.hero-photo:has(img) { aspect-ratio: auto; display: block; }
+.hero-photo img { position: static; width: 100%; height: auto; max-height: 480px; object-fit: contain; display: block; }
 .photo-slot:not(:has(img))::after { content: ""; position: absolute; inset: 14px; border: 1.5px dashed rgba(32, 24, 17, .25); border-radius: calc(var(--radius-xl) - 6px); }
 .photo-slot span, .photo-slot small { display: block; position: relative; }
 .photo-slot span { font: 800 13px var(--font-display); letter-spacing: .06em; color: #47340F; }
@@ -233,9 +244,16 @@ nav a:hover { color: var(--color-primary); }
    CAKE BAND / DELIVERY / CONTACT
    ============================================================================= */
 .cake-band { max-width: 1120px; margin: 0 auto; padding: 10px 20px 84px; display: grid; grid-template-columns: 1fr 1fr; gap: clamp(36px, 7vw, 100px); align-items: center; }
-.cake-photo { position: relative; min-height: 320px; border-radius: var(--radius-xl); overflow: hidden; box-shadow: var(--shadow-lg); background: linear-gradient(155deg, #FBD9DC, #EEAF8B); }
-.cake-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+/* Same box-ratio mismatch the hero had: this pulls from either the Cakes
+   category's wide banner_url (16:7) or its square image_url (1:1), but the
+   box itself was a fixed ~1.5:1 — neither source ratio matches, so cover
+   would crop either one. contain guarantees the whole photo always shows. */
+.cake-photo { position: relative; aspect-ratio: 4 / 3; min-height: 0; border-radius: var(--radius-xl); overflow: hidden; box-shadow: var(--shadow-lg); background: linear-gradient(155deg, #FBD9DC, #EEAF8B); }
+.cake-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
 .cake-band p:not(.eyebrow), .delivery p, .contact p { color: var(--color-text-muted); }
+.tier-cake-note { display: flex; align-items: center; gap: 12px; margin-top: 22px; padding: 12px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+.tier-cake-note img { width: 56px; height: 56px; object-fit: cover; border-radius: var(--radius-sm); flex: none; }
+.tier-cake-note span { font-size: 12px; color: var(--color-text-muted); line-height: 1.5; }
 
 .delivery { background: var(--color-secondary-soft); display: grid; grid-template-columns: .8fr 1.2fr; gap: 52px; align-items: center; }
 .delivery-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
@@ -246,7 +264,10 @@ nav a:hover { color: var(--color-primary); }
 .delivery-cards small { font-size: 13px; line-height: 1.5; color: var(--color-text); }
 
 .contact { max-width: 900px; margin: auto; display: flex; gap: 44px; align-items: center; }
-.contact > img { height: 128px; width: 128px; object-fit: cover; border-radius: 50%; box-shadow: var(--shadow-md); border: 3px solid var(--color-secondary); flex: none; }
+/* Was a circular avatar sized for the logo — a real rectangular storefront
+   photo cropped into a circle would lose most of the shop, so this gets its
+   own rounded-rect treatment instead. */
+.contact > img { height: 180px; width: 240px; object-fit: cover; border-radius: var(--radius-lg); box-shadow: var(--shadow-md); flex: none; }
 .contact-body { flex: 1; }
 .contact-info-grid { display: grid; gap: 12px; margin: 20px 0 22px; }
 .contact-info-row { display: flex; align-items: flex-start; gap: 12px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 13px 15px; }
@@ -408,7 +429,7 @@ legend { font: 700 12px var(--font-display); margin-bottom: 8px; }
   .mobile-nav-call { color: var(--color-primary) !important; }
 
   .hero { min-height: 0; padding: 36px 18px 32px; grid-template-columns: 1fr; gap: 22px; }
-  .hero-photo { grid-row: 1; min-height: 220px; }
+  .hero-photo { grid-row: 1; }
   .hero-copy { grid-row: 2; }
   .hero h1 { font-size: 40px; }
   .hero-copy > p:not(.eyebrow) { font-size: 14.5px; }
@@ -435,7 +456,6 @@ legend { font: 700 12px var(--font-display); margin-bottom: 8px; }
   .qty-stepper { min-height: var(--touch-min); }
 
   .cake-band { grid-template-columns: 1fr; padding: 5px 18px 52px; gap: 24px; }
-  .cake-photo { min-height: 220px; }
 
   .delivery { display: block; padding: 46px 16px; }
   .delivery-cards { margin-top: 22px; grid-template-columns: 1fr; }
@@ -443,7 +463,7 @@ legend { font: 700 12px var(--font-display); margin-bottom: 8px; }
   .delivery-cards small { grid-column: 2; }
 
   .contact { padding: 52px 18px; gap: 18px; align-items: start; flex-direction: column; text-align: center; }
-  .contact > img { width: 90px; height: 90px; margin: auto; }
+  .contact > img { width: 100%; height: 180px; margin: auto; }
   .contact h2 { font-size: 25px; }
   .contact .actions { justify-content: center; }
 
