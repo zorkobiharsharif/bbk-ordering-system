@@ -16,6 +16,14 @@
      script here is silently blocked and staff get stuck on this page
      forever with no visible error. -->
 <p>Redirecting to <a data-owner-link href="/owner/">the sign-in page</a>…</p>
-<script src="redirect.js"></script>
+<!-- "../staff/redirect.js", not "redirect.js" — Vercel's /staff rewrite
+     serves this file's content without adding a trailing slash to the
+     address bar, so the browser treats "/staff" as a file at the domain
+     root and resolves a bare relative src against that root instead of
+     this folder. Going up first and back down into "staff/" by name
+     self-corrects on both Vercel (the ".." is a no-op at the root) and
+     GitHub Pages (a real one-level ascend from .../staff/), the same
+     pattern base-path.js's own script tag already relies on above. -->
+<script src="../staff/redirect.js"></script>
 </body>
 </html>
