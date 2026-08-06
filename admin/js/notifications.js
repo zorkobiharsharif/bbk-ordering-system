@@ -140,17 +140,6 @@ export function initRealtime() {
     })
     .subscribe();
 
-  db.channel('cake-requests-live')
-    .on('broadcast', { event: 'new_cake_request' }, ({ payload }) => {
-      unseenCount += 1;
-      updateBadge();
-      if (soundEnabled()) playChime();
-      toast(`New custom cake request — ${payload.customerName}`, 'ok');
-      if (window.Notification && Notification.permission === 'granted') {
-        new Notification('New BBK cake request', { body: `${payload.customerName} · tap Cake Requests to view` });
-      }
-    })
-    .subscribe();
 }
 
 export async function renderNotifications(root) {

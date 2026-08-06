@@ -13,7 +13,6 @@ import { renderBanners } from './banners.js';
 import { renderReports } from './reports.js';
 import { renderHours } from './hours.js';
 import { renderSettings } from './settings.js';
-import { renderCakeRequests } from './cake-requests.js';
 import { renderStaff } from './staff.js';
 import { renderNotifications, initRealtime, resetLiveCounter } from './notifications.js';
 import { renderImageGuide } from './image-guide.js';
@@ -31,7 +30,6 @@ const VIEWS = {
   orders: { title: 'Orders', render: renderOrders, ownerOnly: false },
   products: { title: 'Products', render: renderProducts, ownerOnly: false },
   categories: { title: 'Categories', render: renderCategories, ownerOnly: false },
-  'cake-requests': { title: 'Custom Cake Requests', render: renderCakeRequests, ownerOnly: false },
   customers: { title: 'Customers', render: renderCustomers, ownerOnly: true },
   offers: { title: 'Offers', render: renderOffers, ownerOnly: true },
   coupons: { title: 'Coupons', render: renderCoupons, ownerOnly: true },
