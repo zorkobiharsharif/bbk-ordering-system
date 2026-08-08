@@ -21,7 +21,7 @@ self.addEventListener('push', event => {
       // hard to miss until then: stays pinned in the notification shade
       // instead of auto-dismissing, and buzzes instead of just chiming.
       requireInteraction: true,
-      vibrate: [300, 150, 300, 150, 300],
+      vibrate: [500, 200, 500, 200, 500, 200, 500],
     })
   );
 });
