@@ -17,6 +17,11 @@ self.addEventListener('push', event => {
       badge: '../assets/bbk-logo.jpg',
       data: { url: data.url },
       tag: data.tag || 'bbk-order',
+      // A single push can only play its sound once — this is what makes it
+      // hard to miss until then: stays pinned in the notification shade
+      // instead of auto-dismissing, and buzzes instead of just chiming.
+      requireInteraction: true,
+      vibrate: [300, 150, 300, 150, 300],
     })
   );
 });
