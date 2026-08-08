@@ -1,0 +1,14 @@
+{
+  "name": "BBK Control",
+  "short_name": "BBK Control",
+  "description": "Bittu Burger King order management",
+  "start_url": "index.html",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#fbf7ef",
+  "theme_color": "#d6412c",
+  "icons": [
+    { "src": "../assets/bbk-logo.jpg", "sizes": "475x475", "type": "image/jpeg", "purpose": "any" },
+    { "src": "../assets/bbk-logo.jpg", "sizes": "475x475", "type": "image/jpeg", "purpose": "maskable" }
+  ]
+}

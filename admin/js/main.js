@@ -16,6 +16,7 @@ import { renderSettings } from './settings.js';
 import { renderStaff } from './staff.js';
 import { renderNotifications, initRealtime, resetLiveCounter } from './notifications.js';
 import { renderImageGuide } from './image-guide.js';
+import { registerServiceWorker } from './push.js';
 
 // ownerOnly: true means staff cannot open this view even by editing the URL
 // hash or clicking a stray button — show() below refuses it outright. This
@@ -84,6 +85,7 @@ async function boot() {
   wireChangePassword();
   applyRoleVisibility();
   initRealtime();
+  registerServiceWorker().catch(() => { /* unsupported browser — Notifications page shows this */ });
   await show('dashboard');
 }
 

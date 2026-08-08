@@ -1,5 +1,6 @@
 import { db, state, getSession, clearSession } from './state.js';
 import { $ } from './utils.js';
+import { unsubscribeFromPush } from './push.js';
 
 // This page (admin/index.html) has no login form of its own any more —
 // unauthenticated visitors are sent to /owner/ or /staff/, which are the
@@ -25,6 +26,7 @@ export function wireSignOut() {
   document.addEventListener('click', async event => {
     if (!event.target.closest('[data-signout]')) return;
     const session = getSession();
+    await unsubscribeFromPush();
     clearSession();
     try { await db.functions.invoke('admin-logout', { body: { token: session?.token } }); } catch { /* best-effort */ }
     location.href = window.bbkPath('/owner/');

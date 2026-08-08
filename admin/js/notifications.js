@@ -1,5 +1,6 @@
 import { db } from './state.js';
 import { $, money, toast, friendlyError } from './utils.js';
+import { pushSupported, subscribeToPush } from './push.js';
 
 const SOUND_KEY = 'bbk-admin-sound-enabled';
 let unseenCount = 0;
@@ -144,12 +145,16 @@ export function initRealtime() {
 
 export async function renderNotifications(root) {
   const permission = window.Notification ? Notification.permission : 'unsupported';
+  const registration = pushSupported() ? await navigator.serviceWorker.getRegistration('sw.js') : null;
+  const subscription = await registration?.pushManager.getSubscription();
   root.innerHTML = `
     <section class="panel">
-      <h2>Browser notifications</h2>
-      <p class="hint">Fires a desktop notification the instant a new order is saved, as long as this admin tab (or browser) stays open.</p>
-      <p>Status: <b>${permission}</b></p>
-      ${permission === 'granted' ? '' : '<button data-request-permission>Enable browser notifications</button>'}
+      <h2>Push notifications</h2>
+      <p class="hint">${pushSupported()
+        ? 'Alerts you the instant a new order is saved — works even with this app fully closed, once enabled on this device. On Android, install this as an app first (browser menu → "Install app") for the most reliable delivery.'
+        : 'This browser doesn\'t support push notifications.'}</p>
+      <p>Status: <b>${subscription ? 'Enabled on this device' : permission}</b></p>
+      ${subscription ? '' : `<button data-request-permission ${pushSupported() ? '' : 'disabled'}>Enable notifications</button>`}
     </section>
     <section class="panel">
       <h2>Notification sound</h2>
@@ -162,10 +167,18 @@ export async function renderNotifications(root) {
       <div data-activity-log></div>
     </section>`;
 
-  $('[data-request-permission]', root)?.addEventListener('click', async () => {
-    const result = await Notification.requestPermission();
-    toast(result === 'granted' ? 'Notifications enabled.' : 'Permission not granted.', result === 'granted' ? 'ok' : 'error');
-    renderNotifications(root);
+  $('[data-request-permission]', root)?.addEventListener('click', async event => {
+    const button = event.currentTarget;
+    button.disabled = true;
+    try {
+      await subscribeToPush();
+      toast('Notifications enabled on this device.');
+    } catch (error) {
+      toast(error.message === 'Permission denied' || error.name === 'NotAllowedError' ? 'Permission not granted.' : friendlyError(error), 'error');
+    } finally {
+      button.disabled = false;
+      renderNotifications(root);
+    }
   });
   $('[data-sound-toggle]', root).addEventListener('change', event => {
     localStorage.setItem(SOUND_KEY, event.target.checked ? 'on' : 'off');
