@@ -22,22 +22,22 @@ self.addEventListener('push', event => {
       // instead of auto-dismissing, and buzzes instead of just chiming.
       requireInteraction: true,
       vibrate: [500, 200, 500, 200, 500, 200, 500],
+      // A re-send for the same still-pending order reuses this tag — without
+      // renotify, Chrome would silently swap the notification's text with no
+      // new sound/vibration, which defeats the entire point of resending.
+      renotify: true,
     })
   );
 });
 
-// Tapping the notification focuses an already-open admin tab if one
-// exists instead of always opening a new one, then navigates it to the
-// orders view — an already-open tab is the common case since it's the
-// thing that couldn't alert them in the first place.
+// A background push means the app was closed — there's essentially never a
+// real installed-app window already open worth reusing. The Clients API
+// has no reliable way to tell a leftover regular Chrome tab apart from the
+// actual installed standalone app, and "reuse whatever matches" risked
+// focusing that leftover tab (which opens as a browser tab, not the app).
+// Always opening fresh lets Android route it to the installed app itself.
 self.addEventListener('notificationclick', event => {
   event.notification.close();
   const targetUrl = new URL(event.notification.data?.url || 'index.html', self.registration.scope).href;
-  event.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clients => {
-      const existing = clients.find(c => c.url.startsWith(self.registration.scope));
-      if (existing) { existing.focus(); return existing.navigate(targetUrl); }
-      return self.clients.openWindow(targetUrl);
-    })
-  );
+  event.waitUntil(self.clients.openWindow(targetUrl));
 });
