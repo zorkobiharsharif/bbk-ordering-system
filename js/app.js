@@ -440,7 +440,24 @@
     // BBK_CONFIG stays only as a fallback if that fetch ever fails.
     const restaurantLat = catalog.settings?.restaurant_latitude ?? BBK_CONFIG.restaurantLatitude;
     const restaurantLon = catalog.settings?.restaurant_longitude ?? BBK_CONFIG.restaurantLongitude;
+    // getCurrentPosition's own `timeout` option only counts once the browser
+    // has actually started trying to get a fix — it never fires if the
+    // browser silently refuses to even show the permission prompt at all,
+    // which is exactly what Safari does when a location request isn't tied
+    // closely enough to a direct tap (calling this the instant the checkout
+    // dialog opens works on Chrome/Android, not reliably on Safari). Without
+    // this separate timer, those customers were stuck on "Checking your
+    // area..." forever with neither a success nor an error ever arriving.
+    let settled = false;
+    const silentFailureTimer = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      message.textContent = 'Tap "Retry location" above to share your location.';
+    }, 4000);
     navigator.geolocation.getCurrentPosition(position => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(silentFailureTimer);
       const distanceKm = haversine(restaurantLat, restaurantLon, position.coords.latitude, position.coords.longitude);
       customerLocation = { latitude: position.coords.latitude, longitude: position.coords.longitude, distanceKm };
       const subtotal = totals().subtotal;
@@ -457,6 +474,9 @@
       submit.disabled = false;
       submit.textContent = 'Place order on WhatsApp →';
     }, () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(silentFailureTimer);
       customerLocation = null;
       submit.disabled = true;
       submit.textContent = 'Share location to continue';
