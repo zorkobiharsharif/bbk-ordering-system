@@ -444,8 +444,9 @@
       const distanceKm = haversine(restaurantLat, restaurantLon, position.coords.latitude, position.coords.longitude);
       customerLocation = { latitude: position.coords.latitude, longitude: position.coords.longitude, distanceKm };
       const subtotal = totals().subtotal;
-      const blocked = distanceKm > 5 ? 'This location is beyond 5 km. Please call BBK.'
-        : distanceKm > 3 && subtotal < 300 ? 'Minimum order is Rs 300 in this area.'
+      const blocked = distanceKm > 5 ? "Sorry, that's beyond our 5 km delivery range. Please call BBK to order."
+        : distanceKm > 3 && subtotal < 300 ? `Add ₹${(300 - subtotal).toFixed(0)} more — minimum order is Rs 300 for 3-5 km away.`
+        : distanceKm <= 3 && subtotal < 100 ? `Add ₹${(100 - subtotal).toFixed(0)} more — minimum order is Rs 100 for delivery.`
         : null;
       message.textContent = blocked || `Delivery available - ${distanceKm.toFixed(1)} km from BBK`;
       // A blocked distance/minimum still counts as "location shared" — the
@@ -468,8 +469,9 @@
     if (!amount.count) return;
     if (orderingClosed) throw new Error("We're currently closed. Please visit again later.");
     if (!customerLocation) throw new Error('Please share your location to place the order.');
-    if (customerLocation?.distanceKm > 5) throw new Error('This location is beyond 5 km. Please call BBK.');
-    if (customerLocation?.distanceKm > 3 && amount.subtotal < 300) throw new Error('Minimum order is Rs 300 in this area.');
+    if (customerLocation?.distanceKm > 5) throw new Error("Sorry, that's beyond our 5 km delivery range. Please call BBK to order.");
+    if (customerLocation?.distanceKm > 3 && amount.subtotal < 300) throw new Error('Minimum order is Rs 300 for 3-5 km away.');
+    if (customerLocation?.distanceKm <= 3 && amount.subtotal < 100) throw new Error('Minimum order is Rs 100 for delivery.');
 
     const customer = Object.fromEntries(new FormData(form));
     const payload = {
@@ -490,10 +492,17 @@
     // request. The confirmation dialog still shows underneath either way,
     // so if the automatic open is blocked there's still a real button to
     // tap rather than the order just silently going nowhere.
-    window.open(order.whatsappUrl, '_blank');
+    // window.open returns null/undefined when the browser actually blocked
+    // it (vs. just being slow to switch apps) — that's the real fallback
+    // case worth keeping the screen open and waiting on. When it reports
+    // success, auto-close shortly after instead of making them tap
+    // "Continue browsing" to dismiss a screen confirming something that
+    // already visibly happened.
+    const whatsappWindow = window.open(order.whatsappUrl, '_blank');
     $('[data-confirm-title]').textContent = 'One quick step.';
     $('[data-confirm-copy]').textContent = 'WhatsApp should have opened automatically. If it didn\'t, tap the button below to send your order.';
     $('.confirmation-dialog').showModal();
+    if (whatsappWindow) setTimeout(() => $('.confirmation-dialog').close(), 2000);
   }
 
   // ---- Custom cake request dialog ----

@@ -229,6 +229,11 @@
       <p class="notice">Cash on delivery only. We need your live location to deliver accurately — allow it when your phone asks.</p>
       <button type="button" class="location" data-location>Retry location &rarr;</button>
       <small class="location-message" data-location-message>Checking your area…</small>
+      <ul class="delivery-rules">
+        <li>Within 3 km — minimum order ₹100</li>
+        <li>3–5 km — minimum order ₹300</li>
+        <li>Beyond 5 km — sorry, we can't deliver there, please call BBK</li>
+      </ul>
       <div class="checkout-submit-bar">
         <div class="checkout-total">Cash on delivery <b>Rs <span data-total>0</span></b></div>
         <button class="button primary wide" type="submit" data-checkout-submit disabled>Share location to continue</button>
@@ -264,7 +269,7 @@
 
   <dialog class="confirmation-dialog">
     <div>
-      <span class="success">OK</span>
+      <span class="success">&check;</span>
       <p class="eyebrow">Order ready</p>
       <h2 data-confirm-title>One quick step.</h2>
       <p data-confirm-copy>Tap the button below and send the ready order message to BBK on WhatsApp.</p>

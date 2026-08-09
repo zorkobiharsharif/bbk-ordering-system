@@ -138,6 +138,11 @@ export function initRealtime() {
         renderAlertPopup();
         startAlertLoop();
       }
+      // Lets whichever queue/dashboard view is currently on screen reload
+      // itself — otherwise only this badge updated live and the actual
+      // order list quietly went stale until a manual Refresh tap or
+      // navigating away and back. See dashboard.js's wireLiveReload.
+      document.dispatchEvent(new CustomEvent('bbk:new-order'));
     })
     .subscribe();
 

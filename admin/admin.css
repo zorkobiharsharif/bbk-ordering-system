@@ -277,11 +277,16 @@ fieldset.flags legend { font-size: 11px; font-weight: 800; color: var(--muted); 
 
 /* Staff order queue — large cards, one big next-step button, works well as
    a mouse-driven counter screen or a one-thumb phone/tablet in the kitchen. */
-.queue-list { display: grid; gap: 12px; }
-.queue-card { border: 1px solid var(--line); border-radius: var(--radius-md); padding: 16px; background: #fff; }
-.queue-card-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
-.queue-card-top b { font: 700 15px Poppins; }
-.queue-card p { margin: 0 0 12px; color: var(--muted); font-size: 12.5px; }
+.queue-list { display: grid; gap: 14px; }
+.queue-card { border: 1px solid var(--line); border-radius: var(--radius-md); padding: 18px; background: #fff; }
+.queue-card-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.queue-card-top b { font: 700 19px Poppins; }
+/* Amount gets its own visual weight instead of being buried mid-sentence
+   between the name and phone — the three things staff actually need to
+   scan (order #, amount, who/where) each get their own clear line. */
+.queue-card-body { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin: 0 0 14px; }
+.queue-card-amount { font: 800 20px Poppins; color: var(--ink); }
+.queue-card-customer { color: var(--muted); font-size: 13px; }
 .queue-card-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 .queue-card-actions button:not(.primary) { border: 1px solid var(--line); background: #fff; color: var(--ink); min-height: var(--touch-min); padding: 0 16px; }
 .queue-card-actions button.primary.wide { flex: 1; min-width: 200px; min-height: var(--touch-min); }

@@ -4,6 +4,18 @@ export const money = value => new Intl.NumberFormat('en-IN').format(Math.round(v
 export const dateLabel = iso => new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(iso));
 export const todayISO = () => new Date().toISOString().slice(0, 10);
 export const daysAgoISO = days => new Date(Date.now() - days * 86400000).toISOString().slice(0, 10);
+// The real start of "today" in IST, as an exact UTC instant — todayISO()
+// above slices at UTC midnight, which is 5:30am IST, so for the first
+// ~5.5 hours of every IST day it silently means "yesterday". Shifting the
+// clock forward by the IST offset before reading the date components (then
+// shifting the resulting midnight back) gives the correct IST day boundary
+// regardless of what time zone the browser/server itself is in.
+export function todayStartIST() {
+  const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+  const istNow = new Date(Date.now() + IST_OFFSET_MS);
+  const istMidnightAsUTC = Date.UTC(istNow.getUTCFullYear(), istNow.getUTCMonth(), istNow.getUTCDate());
+  return new Date(istMidnightAsUTC - IST_OFFSET_MS).toISOString();
+}
 
 // One shared loading placeholder — several list/report pages used to show
 // nothing at all while their first fetch was in flight (a blank panel reads
