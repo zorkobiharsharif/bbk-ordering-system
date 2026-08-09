@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import webpush from 'npm:web-push@3';
 
 const cors = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-admin-session' };
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...cors, 'Content-Type': 'application/json' } });
@@ -20,6 +21,32 @@ async function broadcast(topic: string, event: string, payload: unknown) {
     });
     if (!res.ok) console.error('broadcast failed', res.status, await res.text());
   } catch (broadcastError) { console.error('broadcast failed', broadcastError); }
+}
+
+// Same pattern already proven working in isolation (test-push,
+// resend-pending-order-alerts) before being wired in here. Every failure
+// path — a bad subscription, a VAPID/config problem, anything — is caught
+// and logged, never re-thrown, so a push problem can never fail the order
+// itself. admin_users!inner + is_active means a disabled account's devices
+// stop getting pushed to immediately.
+async function sendPushNotifications(db: ReturnType<typeof createClient>, orderId: string, orderNumber: number, codTotal: number) {
+  try {
+    webpush.setVapidDetails(
+      `mailto:${Deno.env.get('VAPID_CONTACT_EMAIL')!}`,
+      Deno.env.get('VAPID_PUBLIC_KEY')!,
+      Deno.env.get('VAPID_PRIVATE_KEY')!,
+    );
+    const { data: subs } = await db.from('push_subscriptions').select('endpoint,p256dh,auth,admin_users!inner(is_active)').eq('admin_users.is_active', true);
+    const payload = JSON.stringify({ title: 'New BBK order', body: `#BBK-${orderNumber} · ₹${codTotal} · tap to view`, url: 'index.html', tag: `order-${orderId}` });
+    await Promise.all((subs || []).map(async (sub: any) => {
+      try {
+        await webpush.sendNotification({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, payload);
+      } catch (sendError: any) {
+        if (sendError?.statusCode === 404 || sendError?.statusCode === 410) await db.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
+        else console.error('push send failed', sub.endpoint, sendError?.message || sendError);
+      }
+    }));
+  } catch (pushError) { console.error('push notifications failed', pushError); }
 }
 
 
@@ -127,6 +154,10 @@ Deno.serve(async request => {
     // (service-role, no RLS involved) sidesteps that entirely. Only a
     // rounded amount and order number go out — no customer PII.
     await broadcast('orders-live', 'new_order', { orderId: order.id, orderNumber: order.order_number, codTotal: subtotal - discount });
+    // Reaches devices even with the admin app fully closed — the broadcast
+    // above only reaches an already-open tab. Fully defensive internally
+    // (see sendPushNotifications) — cannot fail or delay the order itself.
+    await sendPushNotifications(db, order.id, order.order_number, subtotal - discount);
 
     return json({ orderNumber: order.order_number, trackingToken: order.tracking_token, whatsappUrl: `https://wa.me/${settings.whatsapp_number}?text=${encodeURIComponent(message)}` });
   } catch (error) { console.error(error); return json({ error: 'We could not create the order. Please call BBK.' }, 500); }
