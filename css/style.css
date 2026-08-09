@@ -387,10 +387,11 @@ legend { font: 700 12px var(--font-display); margin-bottom: 8px; }
 .location-message { display: block; min-height: 20px; text-align: center; color: var(--color-text-muted); font-size: 11.5px; margin: 8px; }
 .hint-inline { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--color-text-muted); }
 .checkout-dialog button[type="submit"]:disabled { opacity: 0.5; cursor: not-allowed; }
-/* Pinned to the bottom of the dialog's own scroll area (not the viewport) —
-   stays reachable when the on-screen keyboard is open and the form scrolls,
-   instead of the customer having to dismiss the keyboard first to find it. */
-.checkout-submit-bar { position: sticky; bottom: -26px; margin: 0 -26px -26px; padding: 14px 26px 26px; background: var(--color-surface); }
+/* Placed above the form fields (not below) — stays visible the instant the
+   dialog opens and, since it's above where the customer is typing, never
+   ends up covered by the on-screen keyboard the way a bottom-anchored
+   button would once a lower field is focused. */
+.checkout-submit-bar { position: sticky; top: -26px; z-index: 1; margin: 0 -26px 18px; padding: 14px 26px; background: var(--color-surface); border-bottom: 1px solid var(--color-border); }
 .checkout-total { display: flex; justify-content: space-between; align-items: center; padding: 14px; background: var(--color-secondary-soft); border-radius: var(--radius-sm); font-size: 13px; margin-bottom: 14px; font-weight: 700; }
 .confirmation-dialog > div { text-align: center; }
 .success { display: grid; place-items: center; background: var(--color-success-bg); color: var(--color-success); width: 60px; height: 60px; border-radius: 50%; font-size: 30px; margin: auto; }

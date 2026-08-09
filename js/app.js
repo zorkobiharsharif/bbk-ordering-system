@@ -483,8 +483,16 @@
     renderCart();
     $('.checkout-dialog').close();
     $('[data-whatsapp]').href = order.whatsappUrl;
+    // Try opening WhatsApp immediately instead of making them tap a second
+    // button — some mobile browsers (mainly iOS Safari) block a fresh
+    // window/navigation once it's no longer tied closely enough to the
+    // original tap, since this now happens after an awaited network
+    // request. The confirmation dialog still shows underneath either way,
+    // so if the automatic open is blocked there's still a real button to
+    // tap rather than the order just silently going nowhere.
+    window.open(order.whatsappUrl, '_blank');
     $('[data-confirm-title]').textContent = 'One quick step.';
-    $('[data-confirm-copy]').textContent = 'Tap the button below and send the ready order message to BBK on WhatsApp.';
+    $('[data-confirm-copy]').textContent = 'WhatsApp should have opened automatically. If it didn\'t, tap the button below to send your order.';
     $('.confirmation-dialog').showModal();
   }
 

@@ -229,14 +229,14 @@
       <p class="notice">Cash on delivery only. We need your live location to deliver accurately — allow it when your phone asks.</p>
       <button type="button" class="location" data-location>Retry location &rarr;</button>
       <small class="location-message" data-location-message>Checking your area…</small>
+      <div class="checkout-submit-bar">
+        <div class="checkout-total">Cash on delivery <b>Rs <span data-total>0</span></b></div>
+        <button class="button primary wide" type="submit" data-checkout-submit disabled>Share location to continue</button>
+      </div>
       <div class="form-grid">
         <label>Name<input name="name" required autocomplete="name"></label>
         <label>Phone number<input name="phone" required pattern="[0-9]{10}" inputmode="numeric" placeholder="10-digit number"></label>
         <label class="full">Landmark / building details <span class="hint-inline">(optional, helps our rider)</span><textarea name="address" placeholder="e.g. Blue gate, 2nd floor, opposite XYZ shop"></textarea></label>
-      </div>
-      <div class="checkout-submit-bar">
-        <div class="checkout-total">Cash on delivery <b>Rs <span data-total>0</span></b></div>
-        <button class="button primary wide" type="submit" data-checkout-submit disabled>Share location to continue</button>
       </div>
     </form>
   </dialog>
