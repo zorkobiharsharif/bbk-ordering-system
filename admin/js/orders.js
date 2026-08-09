@@ -1,5 +1,5 @@
 import { db, state } from './state.js';
-import { $, $$, money, openForm, toast, dateLabel, friendlyError } from './utils.js';
+import { $, $$, money, openForm, toast, dateLabel, friendlyError, todayStartIST } from './utils.js';
 import { exportCSV } from './export.js';
 import { acknowledgeOrder } from './notifications.js';
 
@@ -34,21 +34,26 @@ function orderRow(o) {
   </article>`;
 }
 
+// Active/unresolved tabs are today-only — an order still active from a
+// previous day belongs on the full-history tabs (or gets chased down
+// directly), not cluttering the daily working view. Delivered/Cancelled/All
+// orders keep full history since those are exactly the "look up any past
+// order" tabs (customer disputes, reports, etc.).
 const STATUS_FILTERS = [
-  ['new,address_needs_check', 'Needs action'],
-  ['accepted', 'Accepted'],
-  ['kitchen', 'In kitchen'],
-  ['out_for_delivery', 'Out for delivery'],
-  ['delivered', 'Delivered'],
-  ['cancelled', 'Cancelled'],
-  ['new,address_needs_check,accepted,kitchen,out_for_delivery,delivered,cancelled', 'All orders'],
+  ['new,address_needs_check', 'Needs action', true],
+  ['accepted', 'Accepted', true],
+  ['kitchen', 'In kitchen', true],
+  ['out_for_delivery', 'Out for delivery', true],
+  ['delivered', 'Delivered', false],
+  ['cancelled', 'Cancelled', false],
+  ['new,address_needs_check,accepted,kitchen,out_for_delivery,delivered,cancelled', 'All orders', false],
 ];
 
 export async function renderOrders(root) {
   root.innerHTML = `
     <section class="panel order-filter-bar">
       <div class="filter-chip-row" data-order-filter>
-        ${STATUS_FILTERS.map(([value, label], i) => `<button type="button" class="filter-chip ${i === 0 ? 'active' : ''}" data-value="${value}">${label}</button>`).join('')}
+        ${STATUS_FILTERS.map(([value, label, todayOnly], i) => `<button type="button" class="filter-chip ${i === 0 ? 'active' : ''}" data-value="${value}" data-today-only="${todayOnly}">${label}</button>`).join('')}
       </div>
       <div class="order-filter-row">
         <label class="filter-label">Search<input type="search" data-order-search placeholder="Order #, name or phone…"></label>
@@ -62,10 +67,13 @@ export async function renderOrders(root) {
     </section>`;
 
   let activeStatuses = STATUS_FILTERS[0][0];
+  let activeTodayOnly = STATUS_FILTERS[0][2];
   let lastOrders = [];
   const load = async () => {
     const statuses = activeStatuses.split(',');
-    const { data } = await db.from('orders').select('id,order_number,status,cod_total,discount,address,created_at,customers(name,phone)').in('status', statuses).order('created_at', { ascending: false });
+    let query = db.from('orders').select('id,order_number,status,cod_total,discount,address,created_at,customers(name,phone)').in('status', statuses);
+    if (activeTodayOnly) query = query.gte('created_at', todayStartIST());
+    const { data } = await query.order('created_at', { ascending: false });
     const term = $('[data-order-search]', root).value.trim().toLowerCase();
     lastOrders = (data || []).filter(o => !term
       || String(o.order_number).includes(term)
@@ -77,6 +85,7 @@ export async function renderOrders(root) {
     const chip = event.target.closest('[data-value]');
     if (!chip) return;
     activeStatuses = chip.dataset.value;
+    activeTodayOnly = chip.dataset.todayOnly === 'true';
     $$('.filter-chip', root).forEach(b => b.classList.toggle('active', b === chip));
     load();
   });
