@@ -585,8 +585,14 @@
       const submit = $('[data-checkout-submit]');
       submit.disabled = true;
       submit.textContent = 'Share location to continue';
-      $('[data-location-message]').textContent = 'Required to place your order.';
       $('.checkout-dialog').showModal();
+      // Auto-request instead of making the customer tap a button first —
+      // Android still shows its own native permission popup regardless, this
+      // just removes our extra step before that popup appears. Still tied
+      // closely enough to the checkout-open tap for browsers to allow it.
+      // [data-location] stays in the markup as a manual retry if this gets
+      // denied or the browser blocks the automatic request.
+      getLocation();
     }
 
     if (event.target.closest('[data-apply-coupon]')) {

@@ -226,9 +226,9 @@
       <button type="button" class="round dialog-close" aria-label="Close">&times;</button>
       <p class="eyebrow">Delivery details</p>
       <h2>Where should we bring it?</h2>
-      <p class="notice">Cash on delivery only. We need your live location to deliver accurately — tap the button below.</p>
-      <button type="button" class="location" data-location>Share my location &rarr;</button>
-      <small class="location-message" data-location-message>Required to place your order.</small>
+      <p class="notice">Cash on delivery only. We need your live location to deliver accurately — allow it when your phone asks.</p>
+      <button type="button" class="location" data-location>Retry location &rarr;</button>
+      <small class="location-message" data-location-message>Checking your area…</small>
       <div class="form-grid">
         <label>Name<input name="name" required autocomplete="name"></label>
         <label>Phone number<input name="phone" required pattern="[0-9]{10}" inputmode="numeric" placeholder="10-digit number"></label>
@@ -236,8 +236,10 @@
         <label>Nearby landmark<input name="landmark"></label>
         <label>Delivery note<input name="notes"></label>
       </div>
-      <div class="checkout-total">Cash on delivery <b>Rs <span data-total>0</span></b></div>
-      <button class="button primary wide" type="submit" data-checkout-submit disabled>Share location to continue</button>
+      <div class="checkout-submit-bar">
+        <div class="checkout-total">Cash on delivery <b>Rs <span data-total>0</span></b></div>
+        <button class="button primary wide" type="submit" data-checkout-submit disabled>Share location to continue</button>
+      </div>
     </form>
   </dialog>
 
