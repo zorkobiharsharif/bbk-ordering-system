@@ -17,6 +17,8 @@ function orderingTogglePanel(orderingOn) {
   </section>`;
 }
 
+const formatOrderTime = iso => new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', hour: 'numeric', minute: '2-digit', hour12: true }).format(new Date(iso));
+
 function wireOrderingToggle(root, onChanged) {
   $('[data-toggle-ordering]', root)?.addEventListener('click', async event => {
     const btn = event.currentTarget;
@@ -45,6 +47,7 @@ function queueCard(o) {
     <div class="queue-card-body">
       <span class="queue-card-amount">₹${money(o.cod_total)}</span>
       <span class="queue-card-customer">${o.customers?.name || ''} · ${o.customers?.phone || ''}</span>
+      <span class="queue-card-time">${formatOrderTime(o.created_at)}</span>
     </div>
     <div class="queue-card-actions">
       <button type="button" data-view-order="${o.id}">View details</button>
@@ -101,7 +104,7 @@ export async function renderDashboard(root) {
   // aging on the home screen forever; this widget is for "what's new today".
   const load = async () => {
     const { data: pending } = await db.from('orders')
-      .select('id,order_number,status,cod_total,customers(name,phone)')
+      .select('id,order_number,status,cod_total,created_at,customers(name,phone)')
       .in('status', ['new', 'address_needs_check'])
       .gte('created_at', todayStartIST())
       .order('created_at', { ascending: false });
@@ -142,7 +145,7 @@ export async function renderStaffQueue(root) {
   // whatever's been sitting longest instead of what just came in.
   const load = async () => {
     const { data } = await db.from('orders')
-      .select('id,order_number,status,cod_total,customers(name,phone)')
+      .select('id,order_number,status,cod_total,created_at,customers(name,phone)')
       .in('status', ['new', 'address_needs_check', 'accepted', 'kitchen', 'out_for_delivery'])
       .gte('created_at', todayStartIST())
       .order('created_at', { ascending: false });

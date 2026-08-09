@@ -287,6 +287,7 @@ fieldset.flags legend { font-size: 11px; font-weight: 800; color: var(--muted); 
 .queue-card-body { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin: 0 0 14px; }
 .queue-card-amount { font: 800 20px Poppins; color: var(--ink); }
 .queue-card-customer { color: var(--muted); font-size: 13px; }
+.queue-card-time { margin-left: auto; color: var(--muted); font-size: 12px; font-weight: 700; }
 .queue-card-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 .queue-card-actions button:not(.primary) { border: 1px solid var(--line); background: #fff; color: var(--ink); min-height: var(--touch-min); padding: 0 16px; }
 .queue-card-actions button.primary.wide { flex: 1; min-width: 200px; min-height: var(--touch-min); }

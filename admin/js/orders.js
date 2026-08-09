@@ -25,10 +25,12 @@ export async function advanceOrderStatus(orderId, nextStatus) {
   return {};
 }
 
+const formatOrderTime = iso => new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', hour: 'numeric', minute: '2-digit', hour12: true }).format(new Date(iso));
+
 function orderRow(o) {
   return `<article class="admin-row">
     <div><b>#BBK-${o.order_number}</b><small>${o.customers?.name || ''}</small></div>
-    <div><small>${o.customers?.phone || ''}</small><small>₹${money(o.cod_total)}</small></div>
+    <div><small>${o.customers?.phone || ''}</small><small>₹${money(o.cod_total)} · ${formatOrderTime(o.created_at)}</small></div>
     <span class="status ${o.status}">${STATUS_LABEL[o.status]}</span>
     <button data-open-order="${o.id}">View</button>
   </article>`;
