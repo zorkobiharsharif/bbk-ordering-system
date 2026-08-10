@@ -25,7 +25,9 @@ export async function advanceOrderStatus(orderId, nextStatus) {
   return {};
 }
 
-const formatOrderTime = iso => new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', hour: 'numeric', minute: '2-digit', hour12: true }).format(new Date(iso));
+// Date included (not just time) — Cancelled and All orders still span
+// multiple days, where a bare time like "10:45 pm" doesn't say which day.
+const formatOrderTime = iso => new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', hour12: true }).format(new Date(iso));
 
 function orderRow(o) {
   return `<article class="admin-row">
@@ -36,17 +38,16 @@ function orderRow(o) {
   </article>`;
 }
 
-// Active/unresolved tabs are today-only — an order still active from a
-// previous day belongs on the full-history tabs (or gets chased down
-// directly), not cluttering the daily working view. Delivered/Cancelled/All
-// orders keep full history since those are exactly the "look up any past
-// order" tabs (customer disputes, reports, etc.).
+// Today-only on every tab except Cancelled and All orders — those two stay
+// full history since they're exactly the "look up any past order" tabs
+// (customer disputes, reports, etc.); Export CSV also still covers
+// historical data regardless of what's on screen right now.
 const STATUS_FILTERS = [
   ['new,address_needs_check', 'Needs action', true],
   ['accepted', 'Accepted', true],
   ['kitchen', 'In kitchen', true],
   ['out_for_delivery', 'Out for delivery', true],
-  ['delivered', 'Delivered', false],
+  ['delivered', 'Delivered', true],
   ['cancelled', 'Cancelled', false],
   ['new,address_needs_check,accepted,kitchen,out_for_delivery,delivered,cancelled', 'All orders', false],
 ];
