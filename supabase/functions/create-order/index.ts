@@ -49,6 +49,30 @@ async function sendPushNotifications(db: ReturnType<typeof createClient>, orderI
   } catch (pushError) { console.error('push notifications failed', pushError); }
 }
 
+// Free, native-app alternative/backup to push — sidesteps the whole
+// "browser/OS kills background web push" class of problem, since Telegram
+// itself handles delivery. Same fully-defensive shape as sendPushNotifications:
+// nothing here can ever fail or delay the order itself.
+async function sendTelegramAlerts(db: ReturnType<typeof createClient>, orderNumber: number, codTotal: number) {
+  try {
+    const { data: settings } = await db.from('business_settings').select('telegram_chat_ids').eq('id', true).single();
+    const chatIds: number[] = settings?.telegram_chat_ids || [];
+    if (!chatIds.length) return;
+    const token = Deno.env.get('TELEGRAM_BOT_TOKEN')!;
+    const text = `New BBK order #${orderNumber} — ₹${codTotal}. Open the admin app to view/accept it.`;
+    await Promise.all(chatIds.map(async chatId => {
+      try {
+        const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: chatId, text }),
+        });
+        if (!res.ok) console.error('telegram send failed', chatId, await res.text());
+      } catch (sendError) { console.error('telegram send failed', chatId, sendError); }
+    }));
+  } catch (telegramError) { console.error('telegram alerts failed', telegramError); }
+}
+
 
 const toMinutes = (t: string) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
 const nowMinutesIST = () => {
@@ -158,6 +182,7 @@ Deno.serve(async request => {
     // above only reaches an already-open tab. Fully defensive internally
     // (see sendPushNotifications) — cannot fail or delay the order itself.
     await sendPushNotifications(db, order.id, order.order_number, subtotal - discount);
+    await sendTelegramAlerts(db, order.order_number, subtotal - discount);
 
     return json({ orderNumber: order.order_number, trackingToken: order.tracking_token, whatsappUrl: `https://wa.me/${settings.whatsapp_number}?text=${encodeURIComponent(message)}` });
   } catch (error) { console.error(error); return json({ error: 'We could not create the order. Please call BBK.' }, 500); }
